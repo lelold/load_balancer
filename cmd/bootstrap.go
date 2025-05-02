@@ -8,15 +8,15 @@ import (
 	"syscall"
 	"time"
 
-	"load_balancer/config"
+	"load_balancer/internal/config"
+	"load_balancer/internal/domain/lb"
+	"load_balancer/internal/domain/ratelimiter"
 	"load_balancer/internal/handlers"
 	"load_balancer/internal/logger"
-	"load_balancer/lb"
-	"load_balancer/ratelimiter"
 )
 
 func initializeSystem() (*config.Config, lb.Balancer, ratelimiter.Limiter) {
-	cfgPath := "config.json"
+	cfgPath := "assets/config.json"
 	if len(os.Args) > 1 {
 		cfgPath = os.Args[1]
 	}
@@ -41,7 +41,7 @@ func initializeSystem() (*config.Config, lb.Balancer, ratelimiter.Limiter) {
 
 	rateLimiter := ratelimiter.NewRateLimiter(cfg.RateLimit.Capacity, cfg.RateLimit.RefillRate)
 
-	if err := rateLimiter.LoadClientsFromFile("clients.json"); err != nil {
+	if err := rateLimiter.LoadClientsFromFile("assets/clients.json"); err != nil {
 		logger.Infof("Could not load clients: %v", err)
 	}
 
@@ -49,7 +49,7 @@ func initializeSystem() (*config.Config, lb.Balancer, ratelimiter.Limiter) {
 }
 
 func saveClients(limiter ratelimiter.Limiter) {
-	if err := limiter.SaveClientsToFile("clients.json"); err != nil {
+	if err := limiter.SaveClientsToFile("assets/clients.json"); err != nil {
 		logger.Errorf("Could not save clients: %v", err)
 	}
 }

@@ -5,10 +5,6 @@ import (
 	"sync"
 )
 
-type Strategy interface {
-	GetBackend([]*Backend) *Backend
-}
-
 type RoundRobinStrategy struct {
 	current int
 	mutex   sync.Mutex

@@ -6,10 +6,6 @@ import (
 	"time"
 )
 
-type Balancer interface {
-	http.Handler
-}
-
 type LoadBalancer struct {
 	backends []*Backend
 	strategy Strategy

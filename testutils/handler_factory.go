@@ -4,9 +4,10 @@ import (
 	"fmt"
 	"net/http"
 
+	"load_balancer/internal/app"
+	"load_balancer/internal/domain/lb"
+	"load_balancer/internal/domain/ratelimiter"
 	"load_balancer/internal/handlers"
-	"load_balancer/lb"
-	"load_balancer/ratelimiter"
 )
 
 func NewHandlerWithMockedDeps() http.Handler {
@@ -40,7 +41,8 @@ func NewHandlerWithMockedDeps() http.Handler {
 		balancer.ServeHTTP(w, r)
 	})
 
-	clientHandler := &handlers.ClientHandler{Limiter: rateLimiter}
+	clientService := app.NewService(rateLimiter, balancer)
+	clientHandler := handlers.NewClientHandler(*clientService)
 
 	mux.HandleFunc("/clients", clientHandler.GetPostClients)
 	mux.HandleFunc("/clients/", clientHandler.DeleteClient)

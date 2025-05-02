@@ -6,7 +6,7 @@
       "http://backend2:9002"
     ],
     "rate_limit": {
-        "capacity": 100,
+        "capacity": 50,
         "refill_rate": 10
     } 
 }
