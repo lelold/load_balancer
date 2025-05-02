@@ -7,6 +7,7 @@ import (
 	"net/http"
 )
 
+// NewRouter создает новый роутер
 func NewRouter(rateLimiter ratelimiter.Limiter, balancer lb.Balancer) http.Handler {
 	mux := http.NewServeMux()
 

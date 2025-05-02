@@ -5,6 +5,7 @@ import (
 	"sync"
 )
 
+// RoundRobinStrategy реализует round-robin стратегию
 type RoundRobinStrategy struct {
 	current int
 	mutex   sync.Mutex
@@ -18,7 +19,7 @@ func (rr *RoundRobinStrategy) GetBackend(backends []*Backend) *Backend {
 	for i := 0; i < count; i++ {
 		idx := (rr.current + i) % count
 		b := backends[idx]
-		if b.IsAlive() {
+		if b.IsAlive() { // учитываем, жив ли сервер
 			rr.current = (idx + 1) % count
 			return b
 		}
@@ -26,6 +27,7 @@ func (rr *RoundRobinStrategy) GetBackend(backends []*Backend) *Backend {
 	return nil
 }
 
+// RandomStrategy реализует random стратегию
 type RandomStrategy struct{}
 
 func (r *RandomStrategy) GetBackend(backends []*Backend) *Backend {
@@ -41,6 +43,7 @@ func (r *RandomStrategy) GetBackend(backends []*Backend) *Backend {
 	return live[rand.Intn(len(live))]
 }
 
+// LeastConnectionsStrategy реализует least connections стратегию
 type LeastConnectionsStrategy struct{}
 
 func (l *LeastConnectionsStrategy) GetBackend(backends []*Backend) *Backend {

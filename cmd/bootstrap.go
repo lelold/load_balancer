@@ -15,6 +15,7 @@ import (
 	"load_balancer/internal/logger"
 )
 
+// initializeSystem загружает конфигурацию, инициализирует стратегию балансировки, балансировщик и лимитер
 func initializeSystem() (*config.Config, lb.Balancer, ratelimiter.Limiter) {
 	cfgPath := "assets/config.json"
 	if len(os.Args) > 1 {
@@ -48,16 +49,19 @@ func initializeSystem() (*config.Config, lb.Balancer, ratelimiter.Limiter) {
 	return cfg, balancer, rateLimiter
 }
 
+// saveClients сохраняетов клиентов в файл assets/clients.json
 func saveClients(limiter ratelimiter.Limiter) {
 	if err := limiter.SaveClientsToFile("assets/clients.json"); err != nil {
 		logger.Errorf("Could not save clients: %v", err)
 	}
 }
 
+// setupRouter инициализирует роутер
 func setupRouter(limiter ratelimiter.Limiter, balancer lb.Balancer) http.Handler {
 	return handlers.NewRouter(limiter, balancer)
 }
 
+// startHTTPServer запускает сервер на заданном порту
 func startHTTPServer(port string, handler http.Handler) *http.Server {
 	server := &http.Server{
 		Addr:    ":" + port,
@@ -74,6 +78,7 @@ func startHTTPServer(port string, handler http.Handler) *http.Server {
 	return server
 }
 
+// waitForShutdown асинхронно ожидает завершения
 func waitForShutdown(server *http.Server) {
 	stop := make(chan os.Signal, 1)
 	signal.Notify(stop, syscall.SIGINT, syscall.SIGTERM)

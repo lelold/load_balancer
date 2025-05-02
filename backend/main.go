@@ -1,3 +1,4 @@
+// Package backend/main запускает бекенд сервера с /health
 package main
 
 import (

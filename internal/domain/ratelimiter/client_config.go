@@ -6,14 +6,16 @@ import (
 	"time"
 )
 
+// ClientConfig описывает конфигурацию клиента
 type ClientConfig struct {
-	ClientID   string `json:"client_id"`
-	Capacity   int    `json:"capacity"`
-	RatePerSec int    `json:"rate_per_sec"`
-	Tokens     int    `json:"tokens"`
-	LastRefill int64  `json:"last_refill"`
+	ClientID   string `json:"client_id"`    // уникальный идентификатор клиента
+	Capacity   int    `json:"capacity"`     // максимальное количество токенов
+	RatePerSec int    `json:"rate_per_sec"` // скорость пополнения токенов в секунду
+	Tokens     int    `json:"tokens"`       // текущее количество токенов
+	LastRefill int64  `json:"last_refill"`  // время последнего пополнения
 }
 
+// LoadClientsFromFile загружает конфигурации клиентов из json-файла
 func (r *RateLimiter) LoadClientsFromFile(path string) error {
 	file, err := os.Open(path)
 	if err != nil {
@@ -41,6 +43,7 @@ func (r *RateLimiter) LoadClientsFromFile(path string) error {
 	return nil
 }
 
+// SaveClientsToFile сохраняет конфигурации клиентов из json-файла
 func (r *RateLimiter) SaveClientsToFile(path string) error {
 	r.mutex.RLock()
 	defer r.mutex.RUnlock()

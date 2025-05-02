@@ -5,6 +5,7 @@ import (
 	"time"
 )
 
+// Bucket реализует алгоритм token bucket, используется для контроля запросов от клиента
 type Bucket struct {
 	capacity   int
 	tokens     int
@@ -13,15 +14,18 @@ type Bucket struct {
 	mutex      sync.Mutex
 }
 
+// NewBucket конструирует новый бакет
 func NewBucket(capacity, refillRate int) *Bucket {
 	return &Bucket{
-		capacity:   capacity,
-		tokens:     capacity,
-		refillRate: refillRate,
-		lastRefill: time.Now(),
+		capacity:   capacity,   // максимальное кол-во токенов
+		tokens:     capacity,   // текущее кол-во токенов
+		refillRate: refillRate, // токенов в секунду
+		lastRefill: time.Now(), // время пополнения
 	}
 }
 
+// Allow проверяет, можно ли пропустить запрос, и вычитает токен при разрешении
+// возвращает true, если запрос разрешен
 func (b *Bucket) Allow() bool {
 	b.mutex.Lock()
 	defer b.mutex.Unlock()

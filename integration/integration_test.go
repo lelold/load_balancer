@@ -1,3 +1,4 @@
+// Package integration_test содержит интеграционные тесты для проверки создания клиента и корректной работы лимитера
 package integration_test
 
 import (
@@ -9,6 +10,7 @@ import (
 	"load_balancer/testutils"
 )
 
+// TestCreateClientIntegration проверяет корректное создание клиента
 func TestCreateClientIntegration(t *testing.T) {
 	handler := testutils.NewHandlerWithMockedDeps()
 
@@ -24,6 +26,7 @@ func TestCreateClientIntegration(t *testing.T) {
 	}
 }
 
+// TestRateLimitExceededIntegration проверяет работу лимитера
 func TestRateLimitExceededIntegration(t *testing.T) {
 	handler := testutils.NewHandlerWithMockedDeps()
 

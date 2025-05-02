@@ -1,3 +1,4 @@
+// Package handlers содержит обработчики http-запросов для управления клиентами и их лимитами, а так же инит роутера
 package handlers
 
 import (
@@ -8,21 +9,25 @@ import (
 	"strings"
 )
 
+// ClientConfig представляет структуру данных для конфигурации клиента
 type ClientConfig struct {
-	ClientID   string `json:"client_id"`
-	Capacity   int    `json:"capacity"`
-	RatePerSec int    `json:"rate_per_sec"`
+	ClientID   string `json:"client_id"`    // идентификатор клиента
+	Capacity   int    `json:"capacity"`     // вместимость токенов
+	RatePerSec int    `json:"rate_per_sec"` // скорость добавления токенов в секунду
 }
 
+// ClientHandler обрабатывает запросы, связанные с клиентами и их лимитами
 type ClientHandler struct {
-	svc app.Service
+	svc app.Service // сервис
 }
 
+// NewClientHandler создает новый экземпляр ClientHandler с переданным сервисом
 func NewClientHandler(service app.Service) *ClientHandler {
 	return &ClientHandler{svc: service}
 }
 
-func (h *ClientHandler) CreateOrUpdateClient(w http.ResponseWriter, r *http.Request) {
+// CreateOrUpdateClient создает или обновляет клиента
+func (h *ClientHandler) createOrUpdateClient(w http.ResponseWriter, r *http.Request) {
 	var cfg ClientConfig
 	if err := json.NewDecoder(r.Body).Decode(&cfg); err != nil {
 		http.Error(w, "invalid input", http.StatusBadRequest)
@@ -34,7 +39,8 @@ func (h *ClientHandler) CreateOrUpdateClient(w http.ResponseWriter, r *http.Requ
 	w.WriteHeader(http.StatusOK)
 }
 
-func (h *ClientHandler) GetClients(w http.ResponseWriter, r *http.Request) {
+// GetClients получает список всех клиентов
+func (h *ClientHandler) getClients(w http.ResponseWriter) {
 	clients := h.svc.Limiter.ListClients()
 	resp, _ := json.Marshal(clients)
 	w.Header().Set("Content-Type", "application/json")
@@ -42,17 +48,19 @@ func (h *ClientHandler) GetClients(w http.ResponseWriter, r *http.Request) {
 	w.Write(resp)
 }
 
+// GetPostClients обрабатывает как get, так и post запросы для клиентов
 func (h *ClientHandler) GetPostClients(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodPost:
-		h.CreateOrUpdateClient(w, r)
+		h.createOrUpdateClient(w, r)
 	case http.MethodGet:
-		h.GetClients(w, r)
+		h.getClients(w)
 	default:
 		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
 	}
 }
 
+// DeleteClient удаляет клиента по id из url
 func (h *ClientHandler) DeleteClient(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodDelete {
 		id := strings.TrimPrefix(r.URL.Path, "/clients/")
@@ -71,10 +79,12 @@ func (h *ClientHandler) DeleteClient(w http.ResponseWriter, r *http.Request) {
 	http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 }
 
+// HealthHandler обрабатывает запросы для проверки состояния сервера, отвечает 200 OK если жив
 func (h *ClientHandler) HealthHandler(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
+// ProxyHandler выполняет проксирование запросов на балансировщик
 func (h *ClientHandler) ProxyHandler(svc app.Service) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		clientID := r.Header.Get("X-Client-ID")

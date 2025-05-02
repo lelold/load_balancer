@@ -1,5 +1,6 @@
 package ratelimiter
 
+// Интерфейс лимитера
 type Limiter interface {
 	Allow(clientID string) bool
 	AddClient(clientID string, capacity, refill int)

@@ -1,5 +1,7 @@
+// Package main запускает HTTP-сервер балансировщика нагрузки
 package main
 
+// main функция
 func main() {
 	cfg, balancer, rateLimiter := initializeSystem()
 	defer saveClients(rateLimiter)

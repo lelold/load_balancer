@@ -1,3 +1,4 @@
+// Package testutils содержит вспомогательные функции для создания тестовой среды с моками зависимости балансировщика и лимитера
 package testutils
 
 import (
@@ -10,6 +11,7 @@ import (
 	"load_balancer/internal/handlers"
 )
 
+// NewHandlerWithMockedDeps возвращает http.Handler с преднастроенными зависимостями
 func NewHandlerWithMockedDeps() http.Handler {
 	backends := []string{"http://localhost:8081", "http://localhost:8082"}
 
