@@ -1,0 +1,40 @@
+services:
+  loadbalancer:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    depends_on:
+      - backend1
+      - backend2
+    networks:
+      - appnet
+    volumes:
+      - .:/app
+
+  backend1:
+    build:
+      context: ./backend
+    environment:
+      - PORT=9001
+      - BACKEND_NAME=backend1
+    ports:
+      - "9001:9001"
+    networks:
+      - appnet
+
+  backend2:
+    build:
+      context: ./backend
+    environment:
+      - PORT=9002
+      - BACKEND_NAME=backend2
+    ports:
+      - "9002:9002"
+    networks:
+      - appnet
+
+networks:
+  appnet:
+    driver: bridge
