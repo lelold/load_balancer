@@ -2,6 +2,8 @@ package handlers
 
 import (
 	"encoding/json"
+	"load_balancer/internal/logger"
+	"load_balancer/lb"
 	"load_balancer/ratelimiter"
 	"net/http"
 	"strings"
@@ -20,10 +22,12 @@ type ClientHandler struct {
 func (h *ClientHandler) CreateOrUpdateClient(w http.ResponseWriter, r *http.Request) {
 	var cfg ClientConfig
 	if err := json.NewDecoder(r.Body).Decode(&cfg); err != nil {
+		logger.Error("Invalid http input")
 		http.Error(w, "invalid input", http.StatusBadRequest)
 		return
 	}
 
+	logger.Infof("Created or updated client: %s", cfg.ClientID)
 	h.Limiter.AddClient(cfg.ClientID, cfg.Capacity, cfg.RatePerSec)
 	w.WriteHeader(http.StatusOK)
 }
@@ -62,4 +66,26 @@ func (h *ClientHandler) DeleteClient(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+}
+
+func (h *ClientHandler) HealthHandler(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusOK)
+}
+
+func (h *ClientHandler) ProxyHandler(rateLimiter ratelimiter.Limiter, balancer lb.Balancer) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		clientID := r.Header.Get("X-Client-ID")
+		if clientID == "" {
+			http.Error(w, "Missing X-Client-ID", http.StatusBadRequest)
+			return
+		}
+
+		if !rateLimiter.Allow(clientID) {
+			logger.Infof("Rate limit exceeded for %s", clientID)
+			http.Error(w, "Rate limit exceeded", http.StatusTooManyRequests)
+			return
+		}
+
+		balancer.ServeHTTP(w, r)
+	}
 }

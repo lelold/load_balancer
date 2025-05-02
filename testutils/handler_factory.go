@@ -14,9 +14,9 @@ func NewHandlerWithMockedDeps() http.Handler {
 
 	strategy := &lb.RoundRobinStrategy{}
 
-	balancer := lb.NewLoadBalancer(backends, strategy)
+	var balancer lb.Balancer = lb.NewLoadBalancer(backends, strategy)
 
-	rateLimiter := ratelimiter.NewRateLimiter(5, 5)
+	var rateLimiter ratelimiter.Limiter = ratelimiter.NewRateLimiter(5, 5)
 
 	mux := http.NewServeMux()
 
